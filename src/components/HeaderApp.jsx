@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import { signin } from '../actions';
+import { signin, addProduct } from '../actions';
 import { Layout, Menu, Modal, Input, Icon } from 'antd';
 const { Header } = Layout;
 
@@ -10,13 +10,22 @@ class HeaderApp extends Component {
     this.state = {
       username: '',
       password: '',
+      title: '',
+      img: '',
+      desc: '',
       visible: false,
-      confirmLoading: false,
+      visibleProduct: false,
+      confirmLoading: false
     };
   }
   modalSignin() {
     this.setState({
       visible: true,
+    });
+  }
+  modalAddProduct() {
+    this.setState({
+      visibleProduct: true,
     });
   }
   handleOk() {
@@ -35,14 +44,38 @@ class HeaderApp extends Component {
   handleCancel() {
     this.setState({ visible: false });
   }
+  handleOkProduct() {
+    this.setState({
+      confirmLoading: true,
+    });
+    this.props.addProduct(this.state)
+    setTimeout(() => {
+      this.setState({
+        visibleProduct: false,
+        confirmLoading: false,
+      });
+    }, 2000);
+  }
+  handleCancelProduct() {
+    this.setState({ visibleProduct: false });
+  }
   onChangeUserName(e) {
     this.setState({ username: e.target.value });
   }
   onChangePassword(e) {
     this.setState({ password: e.target.value });
   }
+  onChangeTitle(e) {
+    this.setState({ title: e.target.value });
+  }
+  onChangeImg(e) {
+    this.setState({ img: e.target.value });
+  }
+  onChangeDesc(e) {
+    this.setState({ desc: e.target.value });
+  }
   render() {
-    const { username, password } = this.state;
+    const { username, password, title, img, desc } = this.state;
     const suffix = username ? <Icon type="close-circle" onClick={this.emitEmpty} /> : null;
     return (
       <div>
@@ -54,6 +87,7 @@ class HeaderApp extends Component {
             style={{ lineHeight: '64px' }}
           >
             <Menu.Item key="1" className="logo"><h1>Burger Kong</h1></Menu.Item>
+            <Menu.Item key="5"><a onClick={this.modalAddProduct.bind(this)}>Add Burger</a></Menu.Item>
             <Menu.Item key="3" className="auth-user">Signup</Menu.Item>
             <Menu.Item key="4" className="auth-user"><a onClick={this.modalSignin.bind(this)}>Signin</a></Menu.Item>
             <Menu.Item key="2" className="auth-user"><Icon type="shopping-cart" /></Menu.Item>
@@ -63,7 +97,6 @@ class HeaderApp extends Component {
               confirmLoading={this.state.confirmLoading}
               onCancel={this.handleCancel.bind(this)}
             >
-              <p>{this.state.ModalText}</p>
               <Input
                 placeholder="Enter your userName"
                 prefix={<Icon type="user" />}
@@ -85,6 +118,40 @@ class HeaderApp extends Component {
                 style={{paddingTop: '5'}}
               />
             </Modal>
+
+            <Modal title="Add Product"
+              visible={this.state.visibleProduct}
+              onOk={this.handleOkProduct.bind(this)}
+              confirmLoading={this.state.confirmLoading}
+              onCancel={this.handleCancelProduct.bind(this)}
+            >
+              <Input
+                placeholder="Title"
+                prefix={<Icon type="right" />}
+                suffix={suffix}
+                name="title"
+                value={title}
+                onChange={this.onChangeTitle.bind(this)}
+              />
+              <Input
+                placeholder="Image URL"
+                prefix={<Icon type="right" />}
+                suffix={suffix}
+                name="img"
+                value={img}
+                onChange={this.onChangeImg.bind(this)}
+                style={{paddingTop: '5'}}
+              />
+              <Input
+                placeholder="Description"
+                prefix={<Icon type="right" />}
+                suffix={suffix}
+                name="desc"
+                value={desc}
+                onChange={this.onChangeDesc.bind(this)}
+                style={{paddingTop: '5'}}
+              />
+            </Modal>
           </Menu>
         </Header>
       </div>
@@ -100,7 +167,8 @@ const mapsStateToProps = (state) => {
 
 const mapsDispatchToProps = (dispatch) => {
   return {
-    signin: user => dispatch(signin(user))
+    signin: user => dispatch(signin(user)),
+    addProduct: product => dispatch(addProduct(product)),
   }
 }
 
